@@ -1,0 +1,8 @@
+{
+  "name": "lyra-agent-example",
+  "version": "1.0.0",
+  "description": "Example Lyra IDE agent plugin - echo bot",
+  "main": "index.js",
+  "lyra-agent": true,
+  "license": "MIT"
+}

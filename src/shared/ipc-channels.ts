@@ -1,0 +1,78 @@
+export const IPC = {
+  // File system
+  FS_READ_FILE: 'fs:read-file',
+  FS_WRITE_FILE: 'fs:write-file',
+  FS_LIST_DIR: 'fs:list-dir',
+  FS_OPEN_DIALOG: 'fs:open-dialog',
+  FS_OPEN_FOLDER_DIALOG: 'fs:open-folder-dialog',
+  FS_SAVE_DIALOG: 'fs:save-dialog',
+  FS_WATCH: 'fs:watch',
+  FS_UNWATCH: 'fs:unwatch',
+  FS_STAT: 'fs:stat',
+  FS_CREATE_FILE: 'fs:create-file',
+  FS_CREATE_DIR: 'fs:create-dir',
+  FS_DELETE: 'fs:delete',
+  FS_RENAME: 'fs:rename',
+  FS_NEW_PROJECT: 'fs:new-project',
+
+  // Terminal
+  TERMINAL_SPAWN: 'terminal:spawn',
+  TERMINAL_WRITE: 'terminal:write',
+  TERMINAL_RESIZE: 'terminal:resize',
+  TERMINAL_KILL: 'terminal:kill',
+  TERMINAL_DATA: 'terminal:data',
+  TERMINAL_EXIT: 'terminal:exit',
+
+  // AI Agents
+  AGENT_LIST: 'agent:list',
+  AGENT_SEND: 'agent:send',
+  AGENT_STREAM: 'agent:stream',
+  AGENT_STREAM_END: 'agent:stream-end',
+  AGENT_STOP: 'agent:stop',
+  AGENT_GET_CONFIG: 'agent:get-config',
+  AGENT_SET_MODEL: 'agent:set-model',
+
+  // Settings
+  SETTINGS_GET: 'settings:get',
+  SETTINGS_SET: 'settings:set',
+  SETTINGS_GET_ALL: 'settings:get-all',
+
+  // Auth
+  AUTH_OPEN_URL: 'auth:open-url',
+  AUTH_START_CALLBACK_SERVER: 'auth:start-callback-server',
+  AUTH_STOP_CALLBACK_SERVER: 'auth:stop-callback-server',
+
+  // Git
+  GIT_STATUS: 'git:status',
+  GIT_STAGE: 'git:stage',
+  GIT_UNSTAGE: 'git:unstage',
+  GIT_COMMIT: 'git:commit',
+  GIT_PUSH: 'git:push',
+  GIT_PULL: 'git:pull',
+  GIT_LOG: 'git:log',
+  GIT_DIFF: 'git:diff',
+  GIT_BRANCHES: 'git:branches',
+  GIT_CHECKOUT: 'git:checkout',
+  GIT_CREATE_BRANCH: 'git:create-branch',
+  GIT_INIT: 'git:init',
+  GIT_GET_CONFIG: 'git:get-config',
+  GIT_SET_CONFIG: 'git:set-config',
+
+  // Extensions
+  EXT_LIST_INSTALLED: 'ext:list-installed',
+  EXT_LIST_REGISTRY: 'ext:list-registry',
+  EXT_SEARCH: 'ext:search',
+  EXT_INSTALL: 'ext:install',
+  EXT_UNINSTALL: 'ext:uninstall',
+  EXT_ENABLE: 'ext:enable',
+  EXT_DISABLE: 'ext:disable',
+  EXT_README: 'ext:readme',
+
+  // Markdown / PDF
+  MD_EXPORT_PDF: 'md:export-pdf',
+
+  // Window
+  WINDOW_MINIMIZE: 'window:minimize',
+  WINDOW_MAXIMIZE: 'window:maximize',
+  WINDOW_CLOSE: 'window:close',
+} as const;
