@@ -27,13 +27,12 @@ Lyra is an open-source, cross-platform IDE with customizable AI agent integratio
 
 ### Download (macOS)
 
-Download the latest `.dmg` installer from the [GitHub Releases](https://github.com/AniGarg-IIT/lyra-ide/releases) page:
-/Users/anirb/Anirban/learning/claude/lyra-ide/release/Lyra-0.1.0-arm64.dmg
+Download the latest `.dmg` installer from the [GitHub Releases](https://github.com/anirbanbhat/lyra-ide/releases/) page:
 
 | Chip | Download |
 |------|----------|
-| Apple Silicon (M1/M2/M3/M4) | [Lyra-0.1.0-arm64.dmg](https://github.com/anirbanbhat/lyra-ide/tree/master/release/Lyra-0.1.0-arm64.dmg) |
-| Intel | [Lyra-0.1.0.dmg](https://github.com/anirbanbhat/lyra-ide/tree/master/release/Lyra-0.1.0.dmg) |
+| Apple Silicon (M1/M2/M3/M4) | [Lyra-0.1.0-arm64.dmg](https://github.com/anirbanbhat/lyra-ide/releases/tag/v0.1.0/Lyra-0.1.0-arm64.dmg) |
+| Intel | [Lyra-0.1.0.dmg](https://github.com/anirbanbhat/lyra-ide/releases/tag/v0.1.0/Lyra-0.1.0.dmg) |
 
 > **Note:** The app is not code-signed. On first launch, macOS may block it. Right-click the app and choose **Open**, then click **Open** in the dialog to bypass Gatekeeper.
 
