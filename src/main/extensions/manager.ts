@@ -87,59 +87,77 @@ export class ExtensionManager {
     }));
   }
 
+  private static DEFAULT_REGISTRY_ENTRIES: RegistryEntry[] = [
+    {
+      name: 'lyra-monokai',
+      displayName: 'Monokai Theme',
+      version: '1.0.0',
+      description: 'Classic Monokai color theme for Lyra',
+      author: 'Lyra Community',
+      type: 'theme',
+      url: '',
+    },
+    {
+      name: 'lyra-vim-keys',
+      displayName: 'Vim Keybindings',
+      version: '1.0.0',
+      description: 'Vim-style keyboard shortcuts',
+      author: 'Lyra Community',
+      type: 'plugin',
+      url: '',
+    },
+    {
+      name: 'lyra-python-pack',
+      displayName: 'Python Language Pack',
+      version: '1.0.0',
+      description: 'Enhanced Python support with linting and formatting',
+      author: 'Lyra Community',
+      type: 'language-pack',
+      url: '',
+    },
+    {
+      name: 'lyra-markdown-preview',
+      displayName: 'Markdown Preview',
+      version: '1.0.0',
+      description: 'Live Markdown preview with Mermaid diagram support and PDF export',
+      author: 'Lyra',
+      type: 'plugin',
+      url: '',
+    },
+  ];
+
   async loadRegistry(): Promise<RegistryEntry[]> {
+    let existing: RegistryEntry[] = [];
+
     try {
       const content = await fs.readFile(this.registryPath, 'utf-8');
       const data = JSON.parse(content);
-      return data.extensions || [];
+      existing = data.extensions || [];
     } catch {
-      // Create a default registry file with example entries
-      const defaultRegistry = {
-        version: 1,
-        extensions: [
-          {
-            name: 'lyra-monokai',
-            displayName: 'Monokai Theme',
-            version: '1.0.0',
-            description: 'Classic Monokai color theme for Lyra',
-            author: 'Lyra Community',
-            type: 'theme',
-            url: '',
-          },
-          {
-            name: 'lyra-vim-keys',
-            displayName: 'Vim Keybindings',
-            version: '1.0.0',
-            description: 'Vim-style keyboard shortcuts',
-            author: 'Lyra Community',
-            type: 'plugin',
-            url: '',
-          },
-          {
-            name: 'lyra-python-pack',
-            displayName: 'Python Language Pack',
-            version: '1.0.0',
-            description: 'Enhanced Python support with linting and formatting',
-            author: 'Lyra Community',
-            type: 'language-pack',
-            url: '',
-          },
-          {
-            name: 'lyra-markdown-preview',
-            displayName: 'Markdown Preview',
-            version: '1.0.0',
-            description: 'Live Markdown preview with Mermaid diagram support and PDF export',
-            author: 'Lyra',
-            type: 'plugin',
-            url: '',
-          },
-        ],
-      };
-
-      await fs.mkdir(this.extensionsDir, { recursive: true });
-      await fs.writeFile(this.registryPath, JSON.stringify(defaultRegistry, null, 2), 'utf-8');
-      return defaultRegistry.extensions as RegistryEntry[];
+      // No registry file yet
     }
+
+    // Merge: add any default entries missing from the existing registry
+    const existingNames = new Set(existing.map(e => e.name));
+    let updated = false;
+    for (const entry of ExtensionManager.DEFAULT_REGISTRY_ENTRIES) {
+      if (!existingNames.has(entry.name)) {
+        existing.push(entry);
+        updated = true;
+      }
+    }
+
+    // Write back if we added new defaults (or created fresh)
+    if (updated || existing.length === 0) {
+      await fs.mkdir(this.extensionsDir, { recursive: true });
+      await fs.writeFile(
+        this.registryPath,
+        JSON.stringify({ version: 1, extensions: existing }, null, 2),
+        'utf-8'
+      );
+    }
+
+    return existing;
   }
 
   search(query: string): ExtensionInfo[] {
