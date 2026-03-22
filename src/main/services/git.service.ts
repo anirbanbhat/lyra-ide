@@ -47,7 +47,7 @@ export async function getStatus(cwd: string): Promise<GitStatus> {
   const untracked: GitFileChange[] = [];
 
   try {
-    const porcelain = (await git(['status', '--porcelain'], cwd)).trim();
+    const porcelain = (await git(['status', '--porcelain'], cwd)).trimEnd();
     if (porcelain) {
       for (const line of porcelain.split('\n')) {
         const indexStatus = line[0];
