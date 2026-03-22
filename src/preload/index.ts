@@ -30,6 +30,8 @@ const lyraAPI = {
       ipcRenderer.invoke(IPC.FS_DELETE, path),
     rename: (oldPath: string, newPath: string): Promise<void> =>
       ipcRenderer.invoke(IPC.FS_RENAME, oldPath, newPath),
+    copy: (srcPath: string, destPath: string): Promise<void> =>
+      ipcRenderer.invoke(IPC.FS_COPY, srcPath, destPath),
     newProject: (projectName: string, parentDir: string, template: string): Promise<string> =>
       ipcRenderer.invoke(IPC.FS_NEW_PROJECT, projectName, parentDir, template),
   },

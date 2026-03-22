@@ -94,6 +94,10 @@ export function registerFileSystemIPC() {
     await fs.rename(oldPath, newPath);
   });
 
+  ipcMain.handle(IPC.FS_COPY, async (_event, srcPath: string, destPath: string) => {
+    await fs.cp(srcPath, destPath, { recursive: true });
+  });
+
   ipcMain.handle(
     IPC.FS_NEW_PROJECT,
     async (_event, projectName: string, parentDir: string, template: string) => {

@@ -11,6 +11,7 @@ interface FileTreeState {
   toggleExpanded: (path: string) => void;
   setChildren: (path: string, children: FileEntry[]) => void;
   isExpanded: (path: string) => boolean;
+  refreshDir: (dirPath: string) => Promise<void>;
 }
 
 export const useFileTreeStore = create<FileTreeState>((set, get) => ({
@@ -42,4 +43,20 @@ export const useFileTreeStore = create<FileTreeState>((set, get) => ({
   },
 
   isExpanded: (path) => get().expandedPaths.has(path),
+
+  refreshDir: async (dirPath) => {
+    const { rootPath } = get();
+    try {
+      const entries = await window.lyra.fs.listDir(dirPath);
+      if (dirPath === rootPath) {
+        set({ rootEntries: entries });
+      } else {
+        set(state => ({
+          loadedChildren: { ...state.loadedChildren, [dirPath]: entries },
+        }));
+      }
+    } catch (err) {
+      console.error('Failed to refresh dir:', err);
+    }
+  },
 }));
