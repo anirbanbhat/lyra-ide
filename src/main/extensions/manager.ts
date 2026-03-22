@@ -46,7 +46,7 @@ export class ExtensionManager {
 
   private static DEFAULT_EXTENSIONS = ['lyra-markdown-preview'];
 
-  // Bundled fallback entries — used only when remote + cache are both unavailable
+  // Bundled fallback entries — merged into registry when remote + cache don't have them
   private static BUILTIN_REGISTRY: RegistryEntry[] = [
     {
       name: 'lyra-markdown-preview',
@@ -57,6 +57,26 @@ export class ExtensionManager {
       type: 'plugin',
       url: '',
       repository: 'https://github.com/anirbanbhat/lyra-markdown-preview.git',
+    },
+    {
+      name: 'lyra-vim-keys',
+      displayName: 'Vim Keybindings',
+      version: '1.0.0',
+      description: 'Vim-style keyboard shortcuts for the editor',
+      author: 'Lyra Community',
+      type: 'plugin',
+      url: '',
+      repository: 'https://github.com/anirbanbhat/lyra-vim-keys.git',
+    },
+    {
+      name: 'lyra-python-extension',
+      displayName: 'Python',
+      version: '1.0.0',
+      description: 'Full Python language support: IntelliSense, linting, formatting, debugging, testing, environments, and refactoring',
+      author: 'Lyra',
+      type: 'plugin',
+      url: '',
+      repository: 'https://github.com/anirbanbhat/lyra-python-extension.git',
     },
   ];
 
@@ -157,24 +177,22 @@ export class ExtensionManager {
     try {
       const data = await fetchJSON(REGISTRY_URL) as { extensions?: RegistryEntry[] };
       entries = data.extensions || [];
-      // Cache locally for offline use
-      await fs.mkdir(this.extensionsDir, { recursive: true });
-      await fs.writeFile(this.registryCachePath, JSON.stringify({ version: 1, extensions: entries }, null, 2), 'utf-8');
-      return entries;
     } catch {
       // Remote unavailable — fall through to cache
     }
 
-    // 2. Try local cache
-    try {
-      const content = await fs.readFile(this.registryCachePath, 'utf-8');
-      const data = JSON.parse(content);
-      entries = data.extensions || [];
-    } catch {
-      // No cache
+    // 2. Try local cache if remote failed
+    if (entries.length === 0) {
+      try {
+        const content = await fs.readFile(this.registryCachePath, 'utf-8');
+        const data = JSON.parse(content);
+        entries = data.extensions || [];
+      } catch {
+        // No cache
+      }
     }
 
-    // 3. Merge builtin entries so defaults are always available
+    // 3. Always merge builtin entries so they are available regardless of remote/cache
     const existingNames = new Set(entries.map(e => e.name));
     for (const entry of ExtensionManager.BUILTIN_REGISTRY) {
       if (!existingNames.has(entry.name)) {

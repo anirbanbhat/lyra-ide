@@ -13,6 +13,7 @@ export const IPC = {
   FS_CREATE_DIR: 'fs:create-dir',
   FS_DELETE: 'fs:delete',
   FS_RENAME: 'fs:rename',
+  FS_COPY: 'fs:copy',
   FS_NEW_PROJECT: 'fs:new-project',
 
   // Terminal

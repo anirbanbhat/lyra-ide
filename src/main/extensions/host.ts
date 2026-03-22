@@ -24,7 +24,9 @@ export class ExtensionHost {
     ipcMain.handle('ext:call', async (_event, channel: string, ...args: any[]) => {
       const handler = this.handlers.get(channel);
       if (!handler) {
-        throw new Error(`No handler registered for channel: ${channel}`);
+        // Return null instead of throwing — the extension may not be installed/active
+        console.warn(`[ExtensionHost] No handler for channel: ${channel}`);
+        return null;
       }
       return handler(...args);
     });

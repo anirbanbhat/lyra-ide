@@ -36,6 +36,7 @@ export default function App() {
   const { rootPath, setRootPath, setRootEntries } = useFileTreeStore();
   const { installed, fetchInstalled: fetchExtensions } = useExtensionsStore();
   const isMarkdownPreviewActive = installed.some(e => e.id === 'lyra-markdown-preview' && e.enabled);
+  const isPythonExtActive = installed.some(e => e.id === 'lyra-python-extension' && e.enabled);
   const [sidebarWidth, setSidebarWidth] = useState(260);
   const [showSettings, setShowSettings] = useState(false);
   const [showNewProject, setShowNewProject] = useState(false);
@@ -71,8 +72,8 @@ export default function App() {
     try {
       await window.lyra.fs.writeFile(tab.path, tab.content);
       markSaved(tab.path);
-      // Auto-lint Python files on save
-      if (tab.language === 'python') {
+      // Auto-lint Python files on save (only when Python extension is active)
+      if (tab.language === 'python' && isPythonExtActive) {
         runLint(tab.path, tab.content);
       }
     } catch (err) {
@@ -188,12 +189,14 @@ export default function App() {
             onClick={() => setSidebarView('extensions')}
             title="Extensions (Cmd+Shift+X)"
           />
-          <ActivityBarButton
-            icon="python"
-            active={sidebarView === 'python'}
-            onClick={() => setSidebarView('python')}
-            title="Python"
-          />
+          {isPythonExtActive && (
+            <ActivityBarButton
+              icon="python"
+              active={sidebarView === 'python'}
+              onClick={() => setSidebarView('python')}
+              title="Python"
+            />
+          )}
         </div>
 
         {/* Sidebar */}
