@@ -19,6 +19,13 @@ vi.mock('https', () => ({
   },
 }));
 
+vi.mock('electron', () => ({
+  ipcMain: {
+    handle: vi.fn(),
+    removeHandler: vi.fn(),
+  },
+}));
+
 vi.mock('child_process', () => ({
   execFile: vi.fn(),
 }));

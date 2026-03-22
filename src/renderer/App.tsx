@@ -14,8 +14,10 @@ import { ExtensionsPanel } from './components/extensions/ExtensionsPanel';
 import { GitPanel } from './components/git/GitPanel';
 import { MarkdownPreview } from './components/markdown/MarkdownPreview';
 import { useExtensionsStore } from './store/extensions.store';
+import { usePythonStore } from './store/python.store';
+import { PythonPanel } from './components/python/PythonPanel';
 
-type SidebarView = 'explorer' | 'git' | 'extensions';
+type SidebarView = 'explorer' | 'git' | 'extensions' | 'python';
 
 // Map file extensions to run commands
 const RUN_COMMANDS: Record<string, (file: string) => string> = {
@@ -61,16 +63,22 @@ export default function App() {
     setRootEntries(entries);
   }, [setRootPath, setRootEntries]);
 
+  const { runLint } = usePythonStore();
+
   const handleSave = useCallback(async () => {
     const tab = getActiveTab();
     if (!tab) return;
     try {
       await window.lyra.fs.writeFile(tab.path, tab.content);
       markSaved(tab.path);
+      // Auto-lint Python files on save
+      if (tab.language === 'python') {
+        runLint(tab.path, tab.content);
+      }
     } catch (err) {
       console.error('Failed to save:', err);
     }
-  }, [getActiveTab, markSaved]);
+  }, [getActiveTab, markSaved, runLint]);
 
   const handleProjectCreated = useCallback(async (projectPath: string) => {
     await handleOpenFolder(projectPath);
@@ -180,6 +188,12 @@ export default function App() {
             onClick={() => setSidebarView('extensions')}
             title="Extensions (Cmd+Shift+X)"
           />
+          <ActivityBarButton
+            icon="python"
+            active={sidebarView === 'python'}
+            onClick={() => setSidebarView('python')}
+            title="Python"
+          />
         </div>
 
         {/* Sidebar */}
@@ -192,10 +206,12 @@ export default function App() {
             />
           ) : sidebarView === 'git' ? (
             <GitPanel />
-          ) : (
+          ) : sidebarView === 'extensions' ? (
             <ExtensionsPanel onOpenReadme={(extId, displayName, content) => {
               openFile(`ext-readme://${extId}`, `${displayName} README.md`, content);
             }} />
+          ) : (
+            <PythonPanel />
           )}
         </Sidebar>
 
@@ -219,6 +235,7 @@ export default function App() {
                     key={activeTab.path}
                     content={activeTab.content}
                     language={activeTab.language}
+                    filePath={activeTab.path}
                     onChange={(value) => updateContent(activeTab.path, value)}
                   />
                 </div>
@@ -292,7 +309,7 @@ export default function App() {
 }
 
 function ActivityBarButton({ icon, active, onClick, title }: {
-  icon: 'files' | 'git' | 'extensions';
+  icon: 'files' | 'git' | 'extensions' | 'python';
   active: boolean;
   onClick: () => void;
   title: string;
@@ -301,6 +318,7 @@ function ActivityBarButton({ icon, active, onClick, title }: {
     files: '\u{1F4C1}',       // folder icon
     git: '\u{1F500}',         // git branch icon
     extensions: '\u{1F9E9}',  // puzzle piece
+    python: '\u{1F40D}',      // snake
   };
 
   return (

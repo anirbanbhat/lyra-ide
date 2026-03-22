@@ -71,6 +71,30 @@ export const IPC = {
   // Markdown / PDF
   MD_EXPORT_PDF: 'md:export-pdf',
 
+  // Extension host
+  EXT_CALL: 'ext:call',
+
+  // Python extension channels (routed through ext:call)
+  PYTHON_DETECT_ENVS: 'python:detect-envs',
+  PYTHON_SET_ENV: 'python:set-env',
+  PYTHON_GET_ACTIVE_ENV: 'python:get-active-env',
+  PYTHON_LINT: 'python:lint',
+  PYTHON_FORMAT: 'python:format',
+  PYTHON_COMPLETIONS: 'python:completions',
+  PYTHON_HOVER: 'python:hover',
+  PYTHON_GOTO_DEF: 'python:goto-def',
+  PYTHON_FIND_REFS: 'python:find-refs',
+  PYTHON_DIAGNOSTICS: 'python:diagnostics',
+  PYTHON_DISCOVER_TESTS: 'python:discover-tests',
+  PYTHON_RUN_TESTS: 'python:run-tests',
+  PYTHON_DEBUG_START: 'python:debug-start',
+  PYTHON_DEBUG_STOP: 'python:debug-stop',
+  PYTHON_DEBUG_STATE: 'python:debug-state',
+  PYTHON_REFACTOR: 'python:refactor',
+  PYTHON_SORT_IMPORTS: 'python:sort-imports',
+  PYTHON_GET_CONFIG: 'python:get-config',
+  PYTHON_SET_CONFIG: 'python:set-config',
+
   // Window
   WINDOW_MINIMIZE: 'window:minimize',
   WINDOW_MAXIMIZE: 'window:maximize',

@@ -128,6 +128,47 @@ const lyraAPI = {
       ipcRenderer.invoke(IPC.MD_EXPORT_PDF, htmlContent, defaultName),
   },
 
+  python: {
+    detectEnvs: (cwd: string) =>
+      ipcRenderer.invoke(IPC.EXT_CALL, IPC.PYTHON_DETECT_ENVS, cwd),
+    setEnv: (envPath: string) =>
+      ipcRenderer.invoke(IPC.EXT_CALL, IPC.PYTHON_SET_ENV, envPath),
+    getActiveEnv: () =>
+      ipcRenderer.invoke(IPC.EXT_CALL, IPC.PYTHON_GET_ACTIVE_ENV),
+    lint: (filePath: string, content: string, tool?: string) =>
+      ipcRenderer.invoke(IPC.EXT_CALL, IPC.PYTHON_LINT, filePath, content, tool),
+    format: (filePath: string, content: string, tool?: string) =>
+      ipcRenderer.invoke(IPC.EXT_CALL, IPC.PYTHON_FORMAT, filePath, content, tool),
+    completions: (filePath: string, content: string, line: number, column: number) =>
+      ipcRenderer.invoke(IPC.EXT_CALL, IPC.PYTHON_COMPLETIONS, filePath, content, line, column),
+    hover: (filePath: string, content: string, line: number, column: number) =>
+      ipcRenderer.invoke(IPC.EXT_CALL, IPC.PYTHON_HOVER, filePath, content, line, column),
+    gotoDef: (filePath: string, content: string, line: number, column: number) =>
+      ipcRenderer.invoke(IPC.EXT_CALL, IPC.PYTHON_GOTO_DEF, filePath, content, line, column),
+    findRefs: (filePath: string, content: string, line: number, column: number) =>
+      ipcRenderer.invoke(IPC.EXT_CALL, IPC.PYTHON_FIND_REFS, filePath, content, line, column),
+    diagnostics: (filePath: string, content: string) =>
+      ipcRenderer.invoke(IPC.EXT_CALL, IPC.PYTHON_DIAGNOSTICS, filePath, content),
+    discoverTests: (cwd: string) =>
+      ipcRenderer.invoke(IPC.EXT_CALL, IPC.PYTHON_DISCOVER_TESTS, cwd),
+    runTests: (cwd: string, testIds?: string[]) =>
+      ipcRenderer.invoke(IPC.EXT_CALL, IPC.PYTHON_RUN_TESTS, cwd, testIds),
+    debugStart: (config: any) =>
+      ipcRenderer.invoke(IPC.EXT_CALL, IPC.PYTHON_DEBUG_START, config),
+    debugStop: () =>
+      ipcRenderer.invoke(IPC.EXT_CALL, IPC.PYTHON_DEBUG_STOP),
+    debugState: () =>
+      ipcRenderer.invoke(IPC.EXT_CALL, IPC.PYTHON_DEBUG_STATE),
+    refactor: (request: any) =>
+      ipcRenderer.invoke(IPC.EXT_CALL, IPC.PYTHON_REFACTOR, request),
+    sortImports: (filePath: string, content: string) =>
+      ipcRenderer.invoke(IPC.EXT_CALL, IPC.PYTHON_SORT_IMPORTS, filePath, content),
+    getConfig: () =>
+      ipcRenderer.invoke(IPC.EXT_CALL, IPC.PYTHON_GET_CONFIG),
+    setConfig: (config: any) =>
+      ipcRenderer.invoke(IPC.EXT_CALL, IPC.PYTHON_SET_CONFIG, config),
+  },
+
   extensions: {
     listInstalled: (): Promise<ExtensionInfo[]> =>
       ipcRenderer.invoke(IPC.EXT_LIST_INSTALLED),
