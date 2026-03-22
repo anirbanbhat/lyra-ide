@@ -4,9 +4,7 @@ import { describe, it, expect } from 'vitest';
 // These tests validate that types are correctly structured at runtime through representative objects
 
 describe('Git types', () => {
-  it('should allow constructing a valid GitStatus object', async () => {
-    const { default: _ } = await import('@shared/types/git.types');
-    // Type imports are erased at runtime — validate shape via object literal
+  it('should allow constructing a valid GitStatus object', () => {
     const status = {
       isRepo: true,
       branch: 'main',
