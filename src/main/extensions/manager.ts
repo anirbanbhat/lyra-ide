@@ -5,6 +5,7 @@ import https from 'https';
 import { execFile } from 'child_process';
 import { EXTENSIONS_DIR, REGISTRY_URL } from '@shared/constants';
 import type { ExtensionInfo, ExtensionManifest, RegistryEntry } from '@shared/types/extension.types';
+import { extensionHost } from './host';
 
 interface ExtensionState {
   enabled: boolean;
@@ -69,6 +70,25 @@ export class ExtensionManager {
         }
       }
     }
+  }
+
+  async activateAll(): Promise<void> {
+    for (const [id, ext] of this.installed) {
+      if (ext.enabled && ext.manifest.main) {
+        await extensionHost.activate(id, ext.path, ext.manifest.main);
+      }
+    }
+  }
+
+  async activateExtension(id: string): Promise<void> {
+    const ext = this.installed.get(id);
+    if (ext?.enabled && ext.manifest.main) {
+      await extensionHost.activate(id, ext.path, ext.manifest.main);
+    }
+  }
+
+  async deactivateExtension(id: string): Promise<void> {
+    await extensionHost.deactivate(id);
   }
 
   async loadInstalled(): Promise<void> {

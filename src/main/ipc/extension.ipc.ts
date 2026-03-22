@@ -5,7 +5,9 @@ import { ExtensionManager } from '../extensions/manager';
 const extensionManager = new ExtensionManager();
 
 // Initialization promise — handlers wait for this before responding
-const initPromise = extensionManager.loadInstalled().then(() => extensionManager.ensureDefaults());
+const initPromise = extensionManager.loadInstalled()
+  .then(() => extensionManager.ensureDefaults())
+  .then(() => extensionManager.activateAll());
 
 export function registerExtensionIPC() {
   ipcMain.handle(IPC.EXT_LIST_INSTALLED, async () => {
@@ -26,20 +28,24 @@ export function registerExtensionIPC() {
   ipcMain.handle(IPC.EXT_INSTALL, async (_event, id: string) => {
     await initPromise;
     await extensionManager.install(id);
+    await extensionManager.activateExtension(id);
   });
 
   ipcMain.handle(IPC.EXT_UNINSTALL, async (_event, id: string) => {
     await initPromise;
+    await extensionManager.deactivateExtension(id);
     await extensionManager.uninstall(id);
   });
 
   ipcMain.handle(IPC.EXT_ENABLE, async (_event, id: string) => {
     await initPromise;
     await extensionManager.enable(id);
+    await extensionManager.activateExtension(id);
   });
 
   ipcMain.handle(IPC.EXT_DISABLE, async (_event, id: string) => {
     await initPromise;
+    await extensionManager.deactivateExtension(id);
     await extensionManager.disable(id);
   });
 
