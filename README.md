@@ -298,7 +298,7 @@ If the current folder isn't a Git repository, the panel shows an **Initialize Re
 
 ## Extensions Marketplace
 
-Lyra has a built-in extensions system for adding themes, language packs, and plugins.
+Lyra has a built-in extensions system for adding themes, language packs, and plugins. Each extension lives in its own Git repository and is discovered through the [Lyra Extensions Registry](https://github.com/anirbanbhat/lyra-extensions-registry).
 
 ### Accessing Extensions
 
@@ -307,9 +307,9 @@ Lyra has a built-in extensions system for adding themes, language packs, and plu
 
 ### Browse & Install
 
-1. Switch to the **Browse** tab to see available extensions from the registry
+1. Switch to the **Browse** tab to see available extensions from the remote registry
 2. Use the search bar to filter extensions
-3. Click **Install** to add an extension
+3. Click **Install** — Lyra clones the extension's Git repository automatically
 
 ### Manage Installed
 
@@ -329,14 +329,16 @@ Lyra has a built-in extensions system for adding themes, language packs, and plu
 
 ### Default Extensions
 
-Lyra ships with the **Markdown Preview** extension (`lyra-markdown-preview`) pre-installed. It provides:
+Lyra ships with the **Markdown Preview** extension ([lyra-markdown-preview](https://github.com/anirbanbhat/lyra-markdown-preview)) pre-installed. It provides:
 - Live split-view Markdown preview
 - Mermaid diagram rendering
 - PDF export
 
 Toggle the preview with **Cmd+Shift+M** when a `.md` file is open. You can disable or uninstall it from the Extensions panel like any other extension.
 
-For creating your own extensions, see [Creating Custom Extensions](docs/creating-extensions.md).
+### Publishing Your Own Extension
+
+Extension authors can register their extensions by submitting a PR to the [Lyra Extensions Registry](https://github.com/anirbanbhat/lyra-extensions-registry). See [Creating Custom Extensions](docs/creating-extensions.md) for full details.
 
 ---
 

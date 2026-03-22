@@ -35,4 +35,5 @@ export interface RegistryEntry {
   author: string;
   type: ExtensionType;
   url: string;
+  repository?: string;
 }

@@ -1,20 +1,63 @@
 import fs from 'fs/promises';
 import path from 'path';
 import os from 'os';
-import { EXTENSIONS_DIR } from '@shared/constants';
+import https from 'https';
+import { execFile } from 'child_process';
+import { EXTENSIONS_DIR, REGISTRY_URL } from '@shared/constants';
 import type { ExtensionInfo, ExtensionManifest, RegistryEntry } from '@shared/types/extension.types';
 
 interface ExtensionState {
   enabled: boolean;
 }
 
+function fetchJSON(url: string): Promise<unknown> {
+  return new Promise((resolve, reject) => {
+    https.get(url, { headers: { 'User-Agent': 'Lyra-IDE' } }, (res) => {
+      if (res.statusCode && res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+        return fetchJSON(res.headers.location).then(resolve, reject);
+      }
+      if (res.statusCode !== 200) {
+        return reject(new Error(`HTTP ${res.statusCode}`));
+      }
+      let data = '';
+      res.on('data', (chunk) => { data += chunk; });
+      res.on('end', () => {
+        try { resolve(JSON.parse(data)); } catch (e) { reject(e); }
+      });
+      res.on('error', reject);
+    }).on('error', reject);
+  });
+}
+
+function gitClone(url: string, dest: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    execFile('git', ['clone', '--depth', '1', url, dest], (err) => {
+      if (err) reject(err); else resolve();
+    });
+  });
+}
+
 export class ExtensionManager {
   private extensionsDir = path.join(os.homedir(), EXTENSIONS_DIR);
   private statePath = path.join(os.homedir(), EXTENSIONS_DIR, 'extensions-state.json');
-  private registryPath = path.join(os.homedir(), EXTENSIONS_DIR, 'registry.json');
+  private registryCachePath = path.join(os.homedir(), EXTENSIONS_DIR, 'registry.json');
   private installed = new Map<string, { manifest: ExtensionManifest; enabled: boolean; path: string }>();
 
   private static DEFAULT_EXTENSIONS = ['lyra-markdown-preview'];
+
+  // Bundled fallback entries — used only when remote + cache are both unavailable
+  private static BUILTIN_REGISTRY: RegistryEntry[] = [
+    {
+      name: 'lyra-markdown-preview',
+      displayName: 'Markdown Preview',
+      version: '1.0.0',
+      description: 'Live Markdown preview with Mermaid diagram support and PDF export',
+      author: 'Lyra',
+      type: 'plugin',
+      url: '',
+      repository: 'https://github.com/anirbanbhat/lyra-markdown-preview.git',
+    },
+  ];
 
   async ensureDefaults(): Promise<void> {
     for (const id of ExtensionManager.DEFAULT_EXTENSIONS) {
@@ -22,7 +65,7 @@ export class ExtensionManager {
         try {
           await this.install(id);
         } catch {
-          // Ignore if install fails (e.g. registry not ready)
+          // Ignore — will retry on next launch
         }
       }
     }
@@ -87,77 +130,45 @@ export class ExtensionManager {
     }));
   }
 
-  private static DEFAULT_REGISTRY_ENTRIES: RegistryEntry[] = [
-    {
-      name: 'lyra-monokai',
-      displayName: 'Monokai Theme',
-      version: '1.0.0',
-      description: 'Classic Monokai color theme for Lyra',
-      author: 'Lyra Community',
-      type: 'theme',
-      url: '',
-    },
-    {
-      name: 'lyra-vim-keys',
-      displayName: 'Vim Keybindings',
-      version: '1.0.0',
-      description: 'Vim-style keyboard shortcuts',
-      author: 'Lyra Community',
-      type: 'plugin',
-      url: '',
-    },
-    {
-      name: 'lyra-python-pack',
-      displayName: 'Python Language Pack',
-      version: '1.0.0',
-      description: 'Enhanced Python support with linting and formatting',
-      author: 'Lyra Community',
-      type: 'language-pack',
-      url: '',
-    },
-    {
-      name: 'lyra-markdown-preview',
-      displayName: 'Markdown Preview',
-      version: '1.0.0',
-      description: 'Live Markdown preview with Mermaid diagram support and PDF export',
-      author: 'Lyra',
-      type: 'plugin',
-      url: '',
-    },
-  ];
-
   async loadRegistry(): Promise<RegistryEntry[]> {
-    let existing: RegistryEntry[] = [];
+    let entries: RegistryEntry[] = [];
 
+    // 1. Try fetching from remote registry
     try {
-      const content = await fs.readFile(this.registryPath, 'utf-8');
-      const data = JSON.parse(content);
-      existing = data.extensions || [];
+      const data = await fetchJSON(REGISTRY_URL) as { extensions?: RegistryEntry[] };
+      entries = data.extensions || [];
+      // Cache locally for offline use
+      await fs.mkdir(this.extensionsDir, { recursive: true });
+      await fs.writeFile(this.registryCachePath, JSON.stringify({ version: 1, extensions: entries }, null, 2), 'utf-8');
+      return entries;
     } catch {
-      // No registry file yet
+      // Remote unavailable — fall through to cache
     }
 
-    // Merge: add any default entries missing from the existing registry
-    const existingNames = new Set(existing.map(e => e.name));
-    let updated = false;
-    for (const entry of ExtensionManager.DEFAULT_REGISTRY_ENTRIES) {
+    // 2. Try local cache
+    try {
+      const content = await fs.readFile(this.registryCachePath, 'utf-8');
+      const data = JSON.parse(content);
+      entries = data.extensions || [];
+    } catch {
+      // No cache
+    }
+
+    // 3. Merge builtin entries so defaults are always available
+    const existingNames = new Set(entries.map(e => e.name));
+    for (const entry of ExtensionManager.BUILTIN_REGISTRY) {
       if (!existingNames.has(entry.name)) {
-        existing.push(entry);
-        updated = true;
+        entries.push(entry);
       }
     }
 
-    // Write back if we added new defaults (or created fresh)
-    if (updated || existing.length === 0) {
+    // Save merged result as cache
+    if (entries.length > 0) {
       await fs.mkdir(this.extensionsDir, { recursive: true });
-      await fs.writeFile(
-        this.registryPath,
-        JSON.stringify({ version: 1, extensions: existing }, null, 2),
-        'utf-8'
-      );
+      await fs.writeFile(this.registryCachePath, JSON.stringify({ version: 1, extensions: entries }, null, 2), 'utf-8');
     }
 
-    return existing;
+    return entries;
   }
 
   search(query: string): ExtensionInfo[] {
@@ -171,7 +182,6 @@ export class ExtensionManager {
   }
 
   async install(id: string): Promise<void> {
-    // Load registry to find the extension
     const registry = await this.loadRegistry();
     const entry = registry.find(e => e.name === id);
     if (!entry) {
@@ -180,7 +190,22 @@ export class ExtensionManager {
 
     const extDir = path.join(this.extensionsDir, id);
 
-    // Create a scaffold extension directory with a valid manifest
+    // If the extension has a git repository, clone it
+    if (entry.repository) {
+      try {
+        // Remove existing dir if present (e.g. failed previous install)
+        try { await fs.rm(extDir, { recursive: true }); } catch {}
+        await gitClone(entry.repository, extDir);
+        // Remove .git directory — we don't need version control inside the extension
+        try { await fs.rm(path.join(extDir, '.git'), { recursive: true }); } catch {}
+        await this.loadInstalled();
+        return;
+      } catch {
+        // Git clone failed — fall through to scaffold install
+      }
+    }
+
+    // Scaffold install (for extensions without a repo URL)
     await fs.mkdir(extDir, { recursive: true });
     const manifest = {
       name: entry.name,
@@ -194,11 +219,9 @@ export class ExtensionManager {
     };
     await fs.writeFile(path.join(extDir, 'package.json'), JSON.stringify(manifest, null, 2), 'utf-8');
     await fs.writeFile(path.join(extDir, 'index.js'), '// Extension entry point\nmodule.exports = {};\n', 'utf-8');
-    // Generate a default README
     const readme = `# ${entry.displayName}\n\n${entry.description}\n\n- **Version**: ${entry.version}\n- **Author**: ${entry.author}\n- **Type**: ${entry.type}\n\n## Usage\n\nThis extension was installed from the Lyra registry.\n`;
     await fs.writeFile(path.join(extDir, 'README.md'), readme, 'utf-8');
 
-    // Reload installed extensions
     await this.loadInstalled();
   }
 
@@ -209,7 +232,6 @@ export class ExtensionManager {
     await fs.rm(ext.path, { recursive: true });
     this.installed.delete(id);
 
-    // Update state file
     const state = await this.loadState();
     delete state[id];
     await this.saveState(state);
@@ -242,7 +264,6 @@ export class ExtensionManager {
     try {
       return await fs.readFile(readmePath, 'utf-8');
     } catch {
-      // No README found — return a generated one from manifest
       const m = ext.manifest;
       return `# ${m.displayName}\n\n${m.description}\n\n- **Version**: ${m.version}\n- **Author**: ${m.author}\n- **Type**: ${m.type}\n`;
     }

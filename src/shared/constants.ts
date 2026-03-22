@@ -3,3 +3,4 @@ export const APP_ID = 'com.lyra.ide';
 export const AGENTS_DIR = '.lyra/agents';
 export const CONFIG_DIR = '.lyra';
 export const EXTENSIONS_DIR = '.lyra/extensions';
+export const REGISTRY_URL = 'https://raw.githubusercontent.com/anirbanbhat/lyra-extensions-registry/main/registry.json';

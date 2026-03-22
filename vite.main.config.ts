@@ -11,7 +11,7 @@ export default defineConfig({
     outDir: 'dist/main',
     emptyDirOnBuild: true,
     rollupOptions: {
-      external: ['electron', 'path', 'fs', 'fs/promises', 'os', 'child_process', 'url', 'http', 'node-pty', 'chokidar', 'electron-store'],
+      external: ['electron', 'path', 'fs', 'fs/promises', 'os', 'child_process', 'url', 'http', 'https', 'node-pty', 'chokidar', 'electron-store'],
     },
     minify: false,
     sourcemap: true,
